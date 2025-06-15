@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+     "jsx": "react-jsx", // ✅ o "preserve" si usas Next.js
+    "types": ["@types/react", "@types/node", "@react-three/fiber"],
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,

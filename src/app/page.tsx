@@ -1,103 +1,78 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { generateExteriorPoints, getRecommendations } from "@/lib/acustic-engine";
+import { useState } from "react";
+import AcousticEditor from "./components/AcousticEditor";
+import Scene3D from "./components/scene3D";
+import initialpoints from "../data/points-dummy.json";
+
+export default function VisualizeRoom() {
+  const [points, setPoints] = useState(initialpoints);
+  const [mode, setMode] = useState<"day" | "night">("day");
+
+  const exteriorPoints = generateExteriorPoints(points);
+  const recommendations = getRecommendations(points, { mode });
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div className={`min-h-screen ${mode === "night" ? "bg-[#0e0e0e] text-white" : "bg-gray-100 text-gray-800"} transition-colors duration-300`}>
+      {/* Header */}
+      <header className="flex justify-between items-center px-6 py-4 border-b border-gray-700">
+        <h1 className="text-2xl font-bold">Acoustic Study</h1>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">🌞 Day</span>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={mode === "night"}
+              onChange={() => setMode(mode === "day" ? "night" : "day")}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div className="w-11 h-6 bg-gray-400 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
+          </label>
+          <span className="text-sm">🌙 Night</span>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="flex flex-col lg:flex-row gap-6 p-6">
+        {/* Editor & recommendations */}
+        <div className="lg:w-1/3 space-y-6">
+          <div className={`p-4 rounded-lg shadow ${mode === "night" ? "bg-[#1a1a1a]" : "bg-white"}`}>
+            <h2 className="text-lg font-semibold mb-4">Acoustic Points</h2>
+            <AcousticEditor points={points} onChange={setPoints} />
+          </div>
+
+          <div className={`p-4 rounded-lg shadow ${mode === "night" ? "bg-[#1a1a1a]" : "bg-white"}`}>
+            <h2 className="text-lg font-semibold mb-2">Recommendations</h2>
+            {recommendations.length > 0 ? (
+              <ul className="list-disc ml-6 space-y-1 text-sm">
+                {recommendations.map((rec, i) => (
+                  <li key={i}>
+                    {rec.includes("⚠️") && <span className="text-yellow-400">{rec}</span>}
+                    {rec.includes("🔴") && <span className="text-red-400">{rec}</span>}
+                    {!rec.includes("⚠️") && !rec.includes("🔴") && rec}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-400">No recommendations yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* 3D Scene */}
+        <div className="lg:w-2/3">
+          <div className={`rounded-lg overflow-hidden shadow ${mode === "night" ? "bg-[#1a1a1a]" : "bg-white"}`}>
+            <Scene3D
+              width={6}
+              height={3}
+              depth={6}
+              points={points}
+              exteriorPoints={exteriorPoints} // <-- Aquí pasas los puntos externos
+            />
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }

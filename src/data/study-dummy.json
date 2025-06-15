@@ -1,0 +1,9 @@
+{
+  "name": "Disco Test",
+  "type": "Discoteca",
+  "dimensions": {
+    "width": 8,
+    "height": 3,
+    "depth": 10
+  }
+}

@@ -39,12 +39,12 @@ export function HeatmapSurfaces({
   // Referencia para animar el shader
   const materialRef = useRef(shaderMaterial);
 
-  // Animación del shader
-  // useFrame(({ clock }) => {
-  //   if (materialRef.current) {
-  //     materialRef.current.uniforms.uTime.value = clock.getElapsedTime() * 0.5;
-  //   }
-  // });
+  //Animación del shader
+  useFrame(({ clock }) => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = clock.getElapsedTime() * 0.5;
+    }
+  });
 
   return (
     <>

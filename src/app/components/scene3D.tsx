@@ -5,7 +5,8 @@ import { CameraControls, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { HeatmapSurfaces } from "./HeatmapSurfaces";
 import { generateRealisticAcousticPoints } from "@/lib/simulateAcousticPoints";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
+import { SourceControl } from "@/components/source-control";
 
 export type AcousticPoint = {
   id: string;
@@ -30,8 +31,15 @@ function getHeatColor(db: number): THREE.Color {
   return color;
 }
 
+type AcousticObject = {
+  id: string;
+  type: 'speaker' | 'microphone';
+  position: [number, number, number];
+};
+
 function SceneContent({ width, height, depth }: Scene3DProps) {
   const points = generateRealisticAcousticPoints(width, depth, 16);
+  
 
   return (
     <>
@@ -78,6 +86,31 @@ function SceneContent({ width, height, depth }: Scene3DProps) {
 }
 
 export default function Scene3D(props: Scene3DProps) {
+  const [objects, setObjects] = useState<AcousticObject[]>([])
+
+  const addSource = () => {
+    setObjects([...objects, {
+      id: crypto.randomUUID(),
+      type: 'speaker',
+      position: [
+        Math.random() * props.width,
+        0.4,
+        Math.random() * props.depth
+      ]
+    }])
+  }
+
+  const addMicrophone = () => {
+    setObjects([...objects, {
+      id: crypto.randomUUID(),
+      type: 'microphone',
+      position: [
+        Math.random() * props.width,
+        0.2,
+        Math.random() * props.depth
+      ]
+    }])
+  }
   return (
     <Suspense>
       <div className="w-full h-[80vh] rounded-lg shadow">
@@ -85,7 +118,15 @@ export default function Scene3D(props: Scene3DProps) {
           <color attach="background" args={["#f0f0f0"]} />
           <SceneContent {...props} />
         </Canvas>
+
+<SourceControl
+        onAddSource={addSource}
+        onAddMicrophone={addMicrophone}
+      />
+
       </div>
     </Suspense>
+
+    
   );
 }

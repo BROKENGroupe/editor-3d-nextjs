@@ -19,17 +19,16 @@ export function HeatmapSurfaces({
   points = [],
   onSelectWall,
 }: Props) {
-  // Shader material con colores personalizados
   const shaderMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: heatmapVertex,
       fragmentShader: heatmapFragment,
       uniforms: {
         uTime: { value: 0 },
-        uColor1: { value: new THREE.Color("#0000ff") }, // azul intenso
-        uColor2: { value: new THREE.Color("#00ff00") }, // verde
-        uColor3: { value: new THREE.Color("#ffff00") }, // amarillo
-        uColor4: { value: new THREE.Color("#ff0000") }, // rojo
+        uColor1: { value: new THREE.Color("#0000ff") }, // < 60dB azul
+        uColor2: { value: new THREE.Color("#00ff00") }, // 60-70dB verde
+        uColor3: { value: new THREE.Color("#ffff00") }, // 70-80dB amarillo
+        uColor4: { value: new THREE.Color("#ff0000") }, // > 80dB rojo
       },
       transparent: true,
       side: THREE.DoubleSide,
@@ -43,6 +42,15 @@ export function HeatmapSurfaces({
   useFrame(({ clock }) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = clock.getElapsedTime() * 0.5;
+
+      // Actualiza colores basados en puntos cercanos
+      const nearPoints = points.filter((p) => Math.abs(p.y) < 1); // Puntos cerca del suelo
+
+      if (nearPoints.length > 0) {
+        const maxDb = Math.max(...nearPoints.map((p) => p.db));
+        const intensity = (maxDb - 50) / 50; // Normaliza 50-100dB a 0-1
+        materialRef.current.uniforms.uIntensity = { value: intensity };
+      }
     }
   });
 

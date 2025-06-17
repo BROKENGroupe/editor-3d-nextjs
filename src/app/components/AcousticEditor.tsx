@@ -1,6 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { Badge } from '@/components/ui/badge';
 
 type AcousticPoint = {
   id: string;
@@ -14,6 +18,13 @@ type Props = {
   points: AcousticPoint[];
   onChange: (points: AcousticPoint[]) => void;
 };
+
+function getDbLevel(db: number) {
+  if (db >= 80) return { color: "destructive", text: "Peligroso" };
+  if (db >= 70) return { color: "warning", text: "Alto" };
+  if (db >= 60) return { color: "default", text: "Medio" };
+  return { color: "secondary", text: "Bajo" };
+}
 
 export default function AcousticEditor({ points, onChange }: Props) {
   const [localPoints, setLocalPoints] = useState(points);
@@ -47,49 +58,57 @@ export default function AcousticEditor({ points, onChange }: Props) {
   };
 
   return (
-    <div className="w-full p-4 bg-white rounded shadow max-h-[50vh] overflow-auto">
-      <h2 className="text-xl font-bold mb-2">Acoustic Points</h2>
+    <div className="space-y-4">
       {localPoints.map((point, index) => (
-        <div key={point.id} className="flex gap-2 mb-2 items-center">
-          <input
+        <div key={point.id} className="grid grid-cols-[repeat(4,1fr)_auto_auto] gap-2 items-center">
+          <Input
             type="number"
-            className="border p-1 w-14"
             value={point.x}
             onChange={(e) => handleChange(index, 'x', e.target.value)}
+            className="w-full"
             placeholder="X"
           />
-          <input
+          <Input
             type="number"
-            className="border p-1 w-14"
             value={point.y}
             onChange={(e) => handleChange(index, 'y', e.target.value)}
+            className="w-full"
             placeholder="Y"
           />
-          <input
+          <Input
             type="number"
-            className="border p-1 w-14"
             value={point.z}
             onChange={(e) => handleChange(index, 'z', e.target.value)}
+            className="w-full"
             placeholder="Z"
           />
-          <input
+          <Input
             type="number"
-            className="border p-1 w-16"
             value={point.db}
             onChange={(e) => handleChange(index, 'db', e.target.value)}
+            className="w-full"
             placeholder="dB"
           />
-          <button
+          <Badge variant={getDbLevel(point.db).color as any}>
+            {getDbLevel(point.db).text}
+          </Badge>
+          <Button
+            variant="destructive"
+            size="icon"
             onClick={() => handleDelete(index)}
-            className="bg-red-500 text-white px-2 py-1 rounded"
           >
-            ✕
-          </button>
+            <TrashIcon className="h-4 w-4" />
+          </Button>
         </div>
       ))}
-      <button onClick={handleAdd} className="mt-2 bg-blue-600 text-white px-3 py-1 rounded">
-        + Add Point
-      </button>
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={handleAdd}
+      >
+        <PlusIcon className="mr-2 h-4 w-4" />
+        Añadir Punto
+      </Button>
     </div>
   );
 }

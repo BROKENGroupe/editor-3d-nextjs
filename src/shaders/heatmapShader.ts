@@ -10,20 +10,22 @@ void main() {
 
 export const heatmapFragment = `
 uniform float uTime;
-uniform vec3 uColor1; // azul intenso
-uniform vec3 uColor2; // verde
-uniform vec3 uColor3; // amarillo
-uniform vec3 uColor4; // rojo
+uniform vec3 uColor1; // azul (< 60dB)
+uniform vec3 uColor2; // verde (60-70dB)
+uniform vec3 uColor3; // amarillo (70-80dB)
+uniform vec3 uColor4; // rojo (> 80dB)
 varying vec2 vUv;
 
 vec3 getHeatColor(float value) {
     vec3 color;
-    if (value < 0.33) {
-        color = mix(uColor1, uColor2, value * 3.0);
-    } else if (value < 0.66) {
-        color = mix(uColor2, uColor3, (value - 0.33) * 3.0);
-    } else {
-        color = mix(uColor3, uColor4, (value - 0.66) * 3.0);
+    if (value < 0.4) { // < 60dB
+        color = mix(uColor1, uColor2, value * 2.5);
+    } else if (value < 0.6) { // 60-70dB
+        color = mix(uColor2, uColor3, (value - 0.4) * 5.0);
+    } else if (value < 0.8) { // 70-80dB
+        color = mix(uColor3, uColor4, (value - 0.6) * 5.0);
+    } else { // > 80dB
+        color = uColor4;
     }
     return color;
 }
@@ -32,15 +34,10 @@ void main() {
     vec2 center = vec2(0.5, 0.5);
     float dist = distance(vUv, center);
     
-    // Efecto de onda suave
+    float intensity = 1.0 - smoothstep(0.0, 0.8, dist);
     float wave = sin(dist * 10.0 - uTime) * 0.5 + 0.5;
     
-    // Intensidad basada en la distancia al centro
-    float intensity = 1.0 - smoothstep(0.0, 0.8, dist);
-    
-    // Combina onda y distancia
     float value = mix(intensity, wave, 0.2);
-    
     vec3 color = getHeatColor(value);
     
     gl_FragColor = vec4(color, 0.85);

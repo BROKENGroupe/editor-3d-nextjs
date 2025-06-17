@@ -1,6 +1,5 @@
 "use client";
 
-
 import { AcousticPanel } from "@/components/ui/acoustic-panel";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +9,7 @@ import { useState } from "react";
 import initialpoints from "../data/points-dummy.json";
 import Scene3D from "./components/scene3D";
 import AcousticEditor from "./components/AcousticEditor";
+import { MainNav } from "@/components/main-nav";
 
 export default function AcousticStudy() {
   const [points, setPoints] = useState(initialpoints);
@@ -19,9 +19,8 @@ export default function AcousticStudy() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center justify-between">
-          <h1 className="text-xl font-bold">Acoustic Study</h1>
-          <ModeToggle />
+        <div className="container flex h-14 items-center">
+          <MainNav />
         </div>
       </header>
 

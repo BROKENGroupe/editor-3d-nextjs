@@ -1,5 +1,7 @@
 // lib/acoustic-engine.ts
 
+import { acousticMaterials } from "@/data/materials";
+
 export type AcousticPoint = {
   id: string;
   x: number;
@@ -57,36 +59,51 @@ export function getRecommendations(
   return warnings;
 }
 
-export function generateExteriorPoints(points: AcousticPoint[]): AcousticPoint[] {
-  const spread = 5; // qué tanto se propaga el sonido
-  const factor = 0.3; // cuánta intensidad queda
+
+
+export function generateExteriorPoints(
+  points: AcousticPoint[],
+  wallMaterialMap: Record<string, string>
+): AcousticPoint[] {
+  const spread = 5; // distancia hacia afuera
+  const defaultLoss = 20; // pérdida por defecto si no hay material
 
   const extendedPoints: AcousticPoint[] = [];
 
   for (const p of points) {
     if (p.db < 10) continue;
 
-    // Crea 8 puntos alrededor del original
+    const nearWall = 0.5;
+
     const directions = [
-      [spread, 0], [-spread, 0],
-      [0, spread], [0, -spread],
-      [spread, spread], [spread, -spread],
-      [-spread, spread], [-spread, -spread],
+      { dx: -spread, dz: 0, wall: "left", condition: p.x < nearWall },
+      { dx: spread, dz: 0, wall: "right", condition: p.x > 6 - nearWall },
+      { dx: 0, dz: -spread, wall: "front", condition: p.z < nearWall },
+      { dx: 0, dz: spread, wall: "back", condition: p.z > 6 - nearWall },
+      { dx: 0, dz: 0, wall: "top", condition: p.y > 3 - nearWall },
     ];
 
-    for (const [dx, dz] of directions) {
+    for (const dir of directions) {
+      if (!dir.condition) continue;
+
+      const materialName = wallMaterialMap[dir.wall];
+      const material = acousticMaterials.find((m) => m.name === materialName);
+      const loss = material?.absorption ?? defaultLoss;
+      const dbOutside = Math.max(p.db - loss, 0);
+
       extendedPoints.push({
-        id: `${p.id}_ext_${dx}_${dz}`,
-        x: p.x + dx,
-        y: 0,
-        z: p.z + dz,
-        db: Math.max(p.db * factor, 0),
+        id: `${p.id}_ext_${dir.wall}`,
+        x: p.x + dir.dx,
+        y: p.y,
+        z: p.z + dir.dz,
+        db: dbOutside,
       });
     }
   }
 
   return extendedPoints;
 }
+
 
 function drawRGBPoints(ctx: CanvasRenderingContext2D, points: AcousticPoint[], width: number, height: number) {
   ctx.clearRect(0, 0, width, height);
@@ -148,4 +165,14 @@ function interpolateIDW(points: AcousticPoint[], gridSize: number, range: number
   }
 
   return result;
+}
+
+//Atenuación por distancia (espacio libre):
+export function attenuationFreeField(db: number, distance: number): number {
+  return db - 20 * Math.log10(distance);
+}
+
+// absorptivity = 0 (total rebote), 1 (absorbe todo)
+export function absorbByMaterial(db: number, absorptivity: number): number {
+  return db * (1 - absorptivity);
 }

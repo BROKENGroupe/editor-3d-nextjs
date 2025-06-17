@@ -1,0 +1,6 @@
+{
+  "concrete": { "wallLoss": 30 },
+  "wood": { "wallLoss": 20 },
+  "glass": { "wallLoss": 25 },
+  "drywall": { "wallLoss": 18 }
+}

@@ -9,7 +9,7 @@ export function interpolateIDW(
 
   for (let i = 0; i < resolution; i++) {
     for (let j = 0; j < resolution; j++) {
-      const x = (i / resolution) * 10 - 5;  // Normaliza a rango [-5, 5]
+      const x = (i / resolution) * 10 - 5;
       const y = (j / resolution) * 10 - 5;
 
       let num = 0;

@@ -1,0 +1,22 @@
+{
+  "recommendations": [
+    {
+      "zone": "ceiling",
+      "type": "acoustic conditioning",
+      "proposal": "installation of 5cm acoustic foam panels",
+      "expected_effect": {
+        "rt60_reduction_s": 0.7,
+        "estimated_cost_usd": 1200
+      }
+    },
+    {
+      "zone": "east wall",
+      "type": "sound insulation",
+      "proposal": "overlay with high-density sheet + mineral wool + edge sealing",
+      "expected_effect": {
+        "leakage_reduction_db": 15,
+        "estimated_cost_usd": 2200
+      }
+    }
+  ]
+}

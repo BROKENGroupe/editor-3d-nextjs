@@ -1,0 +1,22 @@
+{
+  "sound_system": [
+    {
+      "id": "speaker_01",
+      "type": "subwoofer",
+      "brand": "JBL",
+      "power_w": 1000,
+      "position_xyz_m": [2.5, 0.5, 0.0],
+      "spl_db": 110,
+      "dispersion_angle_deg": 120
+    },
+    {
+      "id": "speaker_02",
+      "type": "mid-range speaker",
+      "brand": "JBL",
+      "power_w": 800,
+      "position_xyz_m": [10.5, 0.5, 2.0],
+      "spl_db": 105,
+      "dispersion_angle_deg": 90
+    }
+  ]
+}

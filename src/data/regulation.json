@@ -1,0 +1,11 @@
+{
+  "regulation": {
+    "country": "Colombia",
+    "law": "Resolution 0627 of 2006",
+    "allowed_limits_db": {
+      "residential_zone_night": 55,
+      "commercial_zone_night": 70
+    },
+    "observations": "The measured level at the north façade exceeds the legal limit. Intervention is required."
+  }
+}

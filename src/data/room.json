@@ -1,0 +1,44 @@
+{
+  "room": {
+    "name": "Bar Sonorama",
+    "location": "Cra 25 #12-34, Bogotá, Colombia",
+    "dimensions": {
+      "width_m": 15.0,
+      "length_m": 30.0,
+      "height_m": 5.0
+    },
+    "space_type": "closed",
+    "maximum_occupancy": 200,
+    "materials": {
+      "walls": {
+        "material": "concrete block",
+        "thickness_cm": 20,
+        "coating": "paint"
+      },
+      "ceiling": {
+        "material": "concrete slab",
+        "thickness_cm": 25
+      },
+      "floor": {
+        "material": "ceramic",
+        "thickness_cm": 2
+      },
+      "doors": [
+        {
+          "location": "main entrance",
+          "material": "solid wood",
+          "thickness_cm": 5,
+          "acoustic_seal": false
+        }
+      ],
+      "windows": [
+        {
+          "location": "north façade",
+          "material": "tempered glass",
+          "thickness_cm": 6,
+          "acoustic_seal": false
+        }
+      ]
+    }
+  }
+}

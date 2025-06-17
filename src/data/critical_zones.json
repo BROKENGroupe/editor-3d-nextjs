@@ -1,0 +1,15 @@
+{
+  "critical_zones": [
+    {
+      "zone": "east wall",
+      "issue": "sound leakage to residential building",
+      "external_noise_level_db": 68,
+      "legal_limit_db": 55
+    },
+    {
+      "zone": "ceiling",
+      "issue": "excessive reflection",
+      "average_rt60_s": 2.1
+    }
+  ]
+}

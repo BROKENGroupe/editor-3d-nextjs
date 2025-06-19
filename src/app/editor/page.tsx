@@ -1,15 +1,15 @@
 "use client";
 
-import { AcousticPanel } from "@/components/ui/acoustic-panel";
+import { AcousticPanel } from "@/app/editor/acoustic-panel";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRecommendations } from "@/lib/acustic-engine";
-import { ModeToggle } from "@/components/mode-toggle";
+import { ModeToggle } from "@/app/editor/mode-toggle";
 import { useState } from "react";
-import initialpoints from "../data/points-dummy.json";
-import Scene3D from "./components/scene3D";
-import AcousticEditor from "./components/AcousticEditor";
+import initialpoints from "../../data/points-dummy.json";
+import AcousticEditor from "../acustic/AcousticEditor";
 import { MainNav } from "@/components/main-nav";
+import Scene3D from "./scene3D";
 
 export default function AcousticStudy() {
   const [points, setPoints] = useState(initialpoints);

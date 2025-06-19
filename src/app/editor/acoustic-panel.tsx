@@ -1,7 +1,7 @@
 import { Badge } from "lucide-react";
-import { Card } from "./card";
-import { Slider } from "./slider";
-import { Button } from "./button";
+import { Card } from "../../components/ui/card";
+import { Slider } from "../../components/ui/slider";
+import { Button } from "../../components/ui/button";
 
 
 

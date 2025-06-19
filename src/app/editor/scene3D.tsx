@@ -3,10 +3,10 @@
 import { Canvas } from "@react-three/fiber";
 import { CameraControls, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
-import { HeatmapSurfaces } from "./HeatmapSurfaces";
 import { generateRealisticAcousticPoints } from "@/lib/simulateAcousticPoints";
 import { Suspense, useState } from "react";
-import { SourceControl } from "@/components/source-control";
+import { SourceControl } from "@/app/editor/source-control";
+import { HeatmapSurfaces } from "../acustic/HeatmapSurfaces";
 
 export type AcousticPoint = {
   id: string;

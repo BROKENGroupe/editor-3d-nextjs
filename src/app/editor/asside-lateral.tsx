@@ -17,8 +17,8 @@ export function CollapsibleAside({ side, children, className }: CollapsibleAside
   // Posiciones para el aside flotante
   const desktopPosition =
     side === "left"
-      ? "left-0 top-0 h-full"
-      : "right-0 top-0 h-full";
+      ? "left-0 top-15 h-full"
+      : "right-0 top-15 h-full";
 
   const buttonPosition =
     side === "left"

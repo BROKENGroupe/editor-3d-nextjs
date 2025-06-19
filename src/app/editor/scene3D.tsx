@@ -118,7 +118,7 @@ export default function Scene3D(props: Scene3DProps) {
   };
   return (
     <Suspense>
-      <div className="w-full h-[80vh] rounded-lg shadow">
+      <div className="w-full h-[100vh] rounded-lg shadow">
         <Canvas camera={{ position: [30, 10, -30], fov: 35 }} shadows>
           <color attach="background" args={["#f0f0f0"]} />
           <SceneContent {...props} />

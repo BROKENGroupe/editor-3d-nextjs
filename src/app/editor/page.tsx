@@ -7,7 +7,7 @@ import { getRecommendations } from "@/lib/acustic-engine";
 import { ModeToggle } from "@/app/editor/mode-toggle";
 import { useState } from "react";
 import initialpoints from "../../data/points-dummy.json";
-import AcousticEditor from "../acustic/AcousticEditor";
+import AcousticEditor from "./AcousticEditor";
 import { MainNav } from "@/components/main-nav";
 import Scene3D from "./scene3D";
 

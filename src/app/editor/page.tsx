@@ -3,12 +3,12 @@
 import { AcousticPanel } from "@/app/editor/acoustic-panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRecommendations } from "@/lib/acustic-engine";
-import { ModeToggle } from "@/app/editor/mode-toggle";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import initialpoints from "../../data/points-dummy.json";
 import AcousticEditor from "./AcousticEditor";
 import { MainNav } from "@/components/main-nav";
 import Scene3D from "./scene3D";
+import { CollapsibleAside } from "./asside-lateral";
 
 export default function AcousticStudy() {
   const [points, setPoints] = useState(initialpoints);
@@ -17,24 +17,16 @@ export default function AcousticStudy() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center">
           <MainNav />
         </div>
-      </header>
+      </header> */}
 
       <main className="container py-6">
-        <div
-          className="
-            grid
-            gap-6
-            grid-cols-1
-            md:grid-cols-[350px_1fr_350px]
-            items-start
-          "
-        >
+        <div className="flex flex-col md:flex-row items-start">
           {/* Aside izquierdo */}
-          <div className="space-y-6">
+          <CollapsibleAside side="left">
             <Card>
               <CardHeader>
                 <CardTitle>Control de Puntos</CardTitle>
@@ -67,20 +59,23 @@ export default function AcousticStudy() {
                 </ul>
               </CardContent>
             </Card>
-          </div>
+          </CollapsibleAside>
 
-          {/* Área de trabajo 3D en el centro, ocupa todo el ancho restante */}
-          <div className="h-[80vh] w-full rounded-lg border bg-card flex items-center justify-center">
-            <Scene3D width={6} height={3} depth={6} />
-          </div>
+          {/* Área de trabajo 3D en el centro */}
+          <section className="w-full  flex flex-col items-center justify-center">
+            <div className="h-[80vh] w-full rounded-lg border bg-card flex items-center justify-center">
+              <Scene3D width={6} height={3} depth={6} />
+            </div>
+          </section>
 
           {/* Aside derecho */}
-          <div className="space-y-6">
+          <CollapsibleAside side="right">
             <AcousticPanel />
             {/* Puedes agregar más paneles aquí si lo deseas */}
-          </div>
+          </CollapsibleAside>
         </div>
       </main>
     </div>
   );
 }
+

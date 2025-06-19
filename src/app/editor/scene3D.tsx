@@ -124,10 +124,10 @@ export default function Scene3D(props: Scene3DProps) {
           <SceneContent {...props} />
         </Canvas>
 
-        <SourceControl
+        {/* <SourceControl
           onAddSource={addSource}
           onAddMicrophone={addMicrophone}
-        />
+        /> */}
       </div>
     </Suspense>
   );

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { heatmapVertex, heatmapFragment } from "@/shaders/heatmapShader";
+import { heatmapVertex, heatmapFragment } from "@/app/shaders/heatmapShader";
 
 type Props = {
   width: number;

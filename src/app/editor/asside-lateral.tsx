@@ -12,7 +12,25 @@ type CollapsibleAsideProps = {
 };
 
 export function CollapsibleAside({ side, children, className }: CollapsibleAsideProps) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  // Posiciones para el aside flotante
+  const desktopPosition =
+    side === "left"
+      ? "left-0 top-0 h-full"
+      : "right-0 top-0 h-full";
+
+  const buttonPosition =
+    side === "left"
+      ? "left-2"
+      : "right-2";
+
+  // Animación: translate-x para entrada/salida
+  const panelAnimation = open
+    ? "translate-x-0 opacity-100"
+    : side === "left"
+      ? "-translate-x-full opacity-0"
+      : "translate-x-full opacity-0";
 
   return (
     <>
@@ -23,7 +41,7 @@ export function CollapsibleAside({ side, children, className }: CollapsibleAside
             <Button
               variant="outline"
               size="icon"
-              className={`fixed top-20 z-40 ${side === "left" ? "left-2" : "right-2"}`}
+              className={`fixed top-20 z-40 ${buttonPosition}`}
             >
               {side === "left" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             </Button>
@@ -33,32 +51,38 @@ export function CollapsibleAside({ side, children, className }: CollapsibleAside
           </SheetContent>
         </Sheet>
       </div>
-      {/* Escritorio: colapsable */}
-      <div
-        className={`hidden md:block transition-all duration-300 ${
-          open ? "md:basis-1/6" : "md:basis-0"
-        } flex-shrink-0 relative ${className ?? ""}`}
-        style={{ minWidth: open ? 240 : 0, maxWidth: open ? 350 : 0 }}
-      >
-        <div className={`absolute top-2 ${side === "left" ? "right-[-18px]" : "left-[-18px]"}`}>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setOpen((v) => !v)}
-            className="border"
-            aria-label={open ? "Ocultar panel" : "Mostrar panel"}
-          >
-            {side === "left"
-              ? open
-                ? <ChevronLeftIcon />
-                : <ChevronRightIcon />
-              : open
-                ? <ChevronRightIcon />
-                : <ChevronLeftIcon />}
-          </Button>
-        </div>
-        <div className={`transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          {open && children}
+      {/* Escritorio: aside flotante animado */}
+      <div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setOpen((v) => !v)}
+          className={`hidden md:flex fixed top-20 z-50 ${buttonPosition}`}
+          aria-label={open ? "Ocultar panel" : "Mostrar panel"}
+        >
+          {side === "left"
+            ? open
+              ? <ChevronLeftIcon />
+              : <ChevronRightIcon />
+            : open
+              ? <ChevronRightIcon />
+              : <ChevronLeftIcon />}
+        </Button>
+        <div
+          className={`
+            hidden md:block fixed z-40 bg-background/95 shadow-lg
+            w-80 h-full p-4
+            transition-all duration-300 ease-in-out
+            ${desktopPosition}
+            ${panelAnimation}
+            ${className ?? ""}
+          `}
+          style={{
+            backdropFilter: "blur(8px)",
+            pointerEvents: open ? "auto" : "none",
+          }}
+        >
+          {children}
         </div>
       </div>
     </>

@@ -1,7 +1,6 @@
 "use client";
 
 import { AcousticPanel } from "@/app/editor/acoustic-panel";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRecommendations } from "@/lib/acustic-engine";
 import { ModeToggle } from "@/app/editor/mode-toggle";
@@ -25,11 +24,16 @@ export default function AcousticStudy() {
       </header>
 
       <main className="container py-6">
-        <div className="grid gap-6 md:grid-cols-[1fr_350px]">
-          <div className="h-[80vh] rounded-lg border bg-card">
-            <Scene3D width={6} height={3} depth={6} />
-          </div>
-
+        <div
+          className="
+            grid
+            gap-6
+            grid-cols-1
+            md:grid-cols-[350px_1fr_350px]
+            items-start
+          "
+        >
+          {/* Aside izquierdo */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -64,10 +68,19 @@ export default function AcousticStudy() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Área de trabajo 3D en el centro, ocupa todo el ancho restante */}
+          <div className="h-[80vh] w-full rounded-lg border bg-card flex items-center justify-center">
+            <Scene3D width={6} height={3} depth={6} />
+          </div>
+
+          {/* Aside derecho */}
+          <div className="space-y-6">
+            <AcousticPanel />
+            {/* Puedes agregar más paneles aquí si lo deseas */}
+          </div>
         </div>
       </main>
-
-      <AcousticPanel />
     </div>
   );
 }

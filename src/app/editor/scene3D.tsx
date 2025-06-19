@@ -33,13 +33,12 @@ function getHeatColor(db: number): THREE.Color {
 
 type AcousticObject = {
   id: string;
-  type: 'speaker' | 'microphone';
+  type: "speaker" | "microphone";
   position: [number, number, number];
 };
 
 function SceneContent({ width, height, depth }: Scene3DProps) {
   const points = generateRealisticAcousticPoints(width, depth, 16);
-  
 
   return (
     <>
@@ -86,31 +85,37 @@ function SceneContent({ width, height, depth }: Scene3DProps) {
 }
 
 export default function Scene3D(props: Scene3DProps) {
-  const [objects, setObjects] = useState<AcousticObject[]>([])
+  const [objects, setObjects] = useState<AcousticObject[]>([]);
 
   const addSource = () => {
-    setObjects([...objects, {
-      id: crypto.randomUUID(),
-      type: 'speaker',
-      position: [
-        Math.random() * props.width,
-        0.4,
-        Math.random() * props.depth
-      ]
-    }])
-  }
+    setObjects([
+      ...objects,
+      {
+        id: crypto.randomUUID(),
+        type: "speaker",
+        position: [
+          Math.random() * props.width,
+          0.4,
+          Math.random() * props.depth,
+        ],
+      },
+    ]);
+  };
 
   const addMicrophone = () => {
-    setObjects([...objects, {
-      id: crypto.randomUUID(),
-      type: 'microphone',
-      position: [
-        Math.random() * props.width,
-        0.2,
-        Math.random() * props.depth
-      ]
-    }])
-  }
+    setObjects([
+      ...objects,
+      {
+        id: crypto.randomUUID(),
+        type: "microphone",
+        position: [
+          Math.random() * props.width,
+          0.2,
+          Math.random() * props.depth,
+        ],
+      },
+    ]);
+  };
   return (
     <Suspense>
       <div className="w-full h-[80vh] rounded-lg shadow">
@@ -119,14 +124,11 @@ export default function Scene3D(props: Scene3DProps) {
           <SceneContent {...props} />
         </Canvas>
 
-<SourceControl
-        onAddSource={addSource}
-        onAddMicrophone={addMicrophone}
-      />
-
+        <SourceControl
+          onAddSource={addSource}
+          onAddMicrophone={addMicrophone}
+        />
       </div>
     </Suspense>
-
-    
   );
 }

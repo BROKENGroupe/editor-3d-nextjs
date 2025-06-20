@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { calculateSPL } from "@/lib/spl";
 
 const MATERIALS = [
   { label: "Hormigón", value: "concrete" },
@@ -127,6 +128,25 @@ export function DraggablePanel({
     handleConfigChange("wallConfig", newWallConfig);
   };
 
+  // Estado para inputs de SPL
+  const [splInputs, setSplInputs] = useState({
+    Lw: 90,      // dB
+    Q: 1,        // Directividad
+    r: 5,        // Distancia (m)
+    alpha: 0.01, // Absorción
+  });
+
+  // Calcular SPL y loguear
+  React.useEffect(() => {
+    const result = calculateSPL(
+      splInputs.Lw,
+      splInputs.Q,
+      splInputs.r,
+      splInputs.alpha
+    );
+    console.log("SPL calculado:", result, "dB");
+  }, [splInputs]);
+
   // Drag logic
   const onMouseDown = (e: React.MouseEvent) => {
     setDragging(true);
@@ -190,11 +210,12 @@ export function DraggablePanel({
       </div>
       <div className="p-4 pt-2">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="grid grid-cols-4 mb-2">
+          <TabsList className="grid grid-cols-5 mb-2">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="walls">Paredes</TabsTrigger>
             <TabsTrigger value="amb">Ambiente</TabsTrigger>
             <TabsTrigger value="vis">Visual</TabsTrigger>
+            <TabsTrigger value="spl">SPL</TabsTrigger>
           </TabsList>
           {/* General */}
           <TabsContent value="general">
@@ -385,6 +406,94 @@ export function DraggablePanel({
                   className="w-10 h-10 p-0 border-none bg-transparent"
                   style={{ minWidth: 40 }}
                 />
+              </div>
+            </div>
+          </TabsContent>
+          {/* SPL */}
+          <TabsContent value="spl">
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-1 block text-xs font-semibold">Potencia sonora (Lw, dB)</Label>
+                <Slider
+                  min={60}
+                  max={120}
+                  step={1}
+                  value={[splInputs.Lw]}
+                  onValueChange={([v]) => setSplInputs(inputs => ({ ...inputs, Lw: v }))}
+                  className="mb-2"
+                />
+                <Input
+                  type="number"
+                  min={60}
+                  max={120}
+                  step={1}
+                  value={splInputs.Lw}
+                  onChange={e => setSplInputs(inputs => ({ ...inputs, Lw: Number(e.target.value) }))}
+                  className="w-20 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="mb-1 block text-xs font-semibold">Directividad (Q)</Label>
+                <Slider
+                  min={1}
+                  max={4}
+                  step={1}
+                  value={[splInputs.Q]}
+                  onValueChange={([v]) => setSplInputs(inputs => ({ ...inputs, Q: v }))}
+                  className="mb-2"
+                />
+                <Input
+                  type="number"
+                  min={1}
+                  max={4}
+                  step={1}
+                  value={splInputs.Q}
+                  onChange={e => setSplInputs(inputs => ({ ...inputs, Q: Number(e.target.value) }))}
+                  className="w-20 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="mb-1 block text-xs font-semibold">Distancia (r, m)</Label>
+                <Slider
+                  min={0.1}
+                  max={20}
+                  step={0.1}
+                  value={[splInputs.r]}
+                  onValueChange={([v]) => setSplInputs(inputs => ({ ...inputs, r: v }))}
+                  className="mb-2"
+                />
+                <Input
+                  type="number"
+                  min={0.1}
+                  max={20}
+                  step={0.1}
+                  value={splInputs.r}
+                  onChange={e => setSplInputs(inputs => ({ ...inputs, r: Number(e.target.value) }))}
+                  className="w-20 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="mb-1 block text-xs font-semibold">Absorción (α, 1/m)</Label>
+                <Slider
+                  min={0}
+                  max={0.1}
+                  step={0.001}
+                  value={[splInputs.alpha]}
+                  onValueChange={([v]) => setSplInputs(inputs => ({ ...inputs, alpha: v }))}
+                  className="mb-2"
+                />
+                <Input
+                  type="number"
+                  min={0}
+                  max={0.1}
+                  step={0.001}
+                  value={splInputs.alpha}
+                  onChange={e => setSplInputs(inputs => ({ ...inputs, alpha: Number(e.target.value) }))}
+                  className="w-20 text-xs"
+                />
+              </div>
+              <div className="mt-4 text-xs text-muted-foreground">
+                El resultado del cálculo SPL se muestra en la consola.
               </div>
             </div>
           </TabsContent>

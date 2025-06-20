@@ -86,7 +86,7 @@ function SceneContent({ width, height, depth, wallProps, onSelectWall }: Scene3D
         width={width}
         height={height}
         depth={depth}
-        points={points}
+        points={[]}
         wallProps={wallProps}
         onSelectWall={onSelectWall}
       />

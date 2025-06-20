@@ -4,13 +4,32 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import { heatmapVertex, heatmapFragment } from "@/app/shaders/heatmapShader";
 
+
 type Props = {
   width: number;
   height: number;
   depth: number;
   points?: any[];
-  onSelectWall?: (wallId: string) => void;
+  onSelectWall?: (wallId: string, opts?: { contextMenu?: boolean; x?: number; y?: number }) => void;
+  wallProps?: Record<string, { material: string; absorption: number; color: string }>;
 };
+
+const WALLS = [
+  { key: "floor", position: [0, 0, 0], rotation: [-Math.PI / 2, 0, 0] as [number, number, number] },
+  { key: "ceiling", position: [0, 1, 0], rotation: [Math.PI / 2, 0, 0] as [number, number, number] },
+  { key: "north", position: [0, 0.5, -0.5], rotation: [0, 0, 0] as [number, number, number] },
+  { key: "south", position: [0, 0.5, 0.5], rotation: [0, Math.PI, 0] as [number, number, number] },
+  { key: "west", position: [-0.5, 0.5, 0], rotation: [0, Math.PI / 2, 0] as [number, number, number] },
+  { key: "east", position: [0.5, 0.5, 0], rotation: [0, -Math.PI / 2, 0] as [number, number, number] },
+].map(wall => ({
+  ...wall,
+  position: [
+    wall.position[0] ?? 0,
+    wall.position[1] ?? 0,
+    wall.position[2] ?? 0
+  ] as [number, number, number],
+  rotation: wall.rotation as [number, number, number]
+}));
 
 export function HeatmapSurfaces({
   width,
@@ -18,6 +37,7 @@ export function HeatmapSurfaces({
   depth,
   points = [],
   onSelectWall,
+  wallProps = {},
 }: Props) {
   const shaderMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
@@ -56,11 +76,44 @@ export function HeatmapSurfaces({
 
   return (
     <>
-      {/* Cubo blanco */}
+      {/* Cubo blanco
       <mesh position={[width / 2, height / 2, depth / 2]}>
         <boxGeometry args={[width, height, depth]} />
         <meshStandardMaterial color="#ffffff" transparent opacity={0.95} />
-      </mesh>
+      </mesh> */}
+
+      {/* Paredes seleccionables */}
+      {WALLS.map((wall) => (
+        <mesh
+          key={wall.key}
+          position={[width / 2, height / 2, depth / 2]}
+          rotation={wall.rotation}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelectWall?.(wall.key);
+          }}
+          onContextMenu={(e) => {
+            e.stopPropagation();
+            e.nativeEvent.preventDefault();
+            onSelectWall?.(wall.key, { contextMenu: true, x: e.clientX, y: e.clientY });
+          }}
+        >
+          {/* <planeGeometry
+            args={
+              wall.key === "floor" || wall.key === "ceiling"
+                ? [width, depth]
+                : [width, height]
+            }
+          /> */}<boxGeometry args={[width, height, depth]} />
+
+
+          <meshStandardMaterial
+            color={wallProps[wall.key]?.color ?? "#e0e0e0"}
+            transparent
+            opacity={0.4}
+          />
+        </mesh>
+      ))}
 
       {/* Plano exterior con shader */}
       <mesh
@@ -73,3 +126,4 @@ export function HeatmapSurfaces({
     </>
   );
 }
+

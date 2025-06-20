@@ -4,9 +4,15 @@ import { Canvas } from "@react-three/fiber";
 import { CameraControls, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { generateRealisticAcousticPoints } from "@/lib/simulateAcousticPoints";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { SourceControl } from "@/app/editor/source-control";
+import { Popover, PopoverContent } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { HeatmapSurfaces } from "../acustic/HeatmapSurfaces";
+import {ContextualMenu} from "./contextual-menu";
 
 export type AcousticPoint = {
   id: string;
@@ -37,7 +43,18 @@ type AcousticObject = {
   position: [number, number, number];
 };
 
-function SceneContent({ width, height, depth }: Scene3DProps) {
+const MATERIALS = [
+  { label: "Hormigón", value: "concrete" },
+  { label: "Ladrillo", value: "brick" },
+  { label: "Madera", value: "wood" },
+  { label: "Vidrio", value: "glass" },
+  { label: "Panel acústico", value: "acoustic_panel" },
+];
+
+function SceneContent({ width, height, depth, wallProps, onSelectWall }: Scene3DProps & {
+  wallProps: Record<string, { material: string; absorption: number; color: string }>,
+  onSelectWall: (wallId: string, opts?: { contextMenu?: boolean, x?: number, y?: number }) => void
+}) {
   const points = generateRealisticAcousticPoints(width, depth, 16);
 
   return (
@@ -70,9 +87,8 @@ function SceneContent({ width, height, depth }: Scene3DProps) {
         height={height}
         depth={depth}
         points={points}
-        onSelectWall={(wallId) => {
-          console.log("Seleccionaste:", wallId);
-        }}
+        wallProps={wallProps}
+        onSelectWall={onSelectWall}
       />
 
       <CameraControls
@@ -86,6 +102,9 @@ function SceneContent({ width, height, depth }: Scene3DProps) {
 
 export default function Scene3D(props: Scene3DProps) {
   const [objects, setObjects] = useState<AcousticObject[]>([]);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; wall: string } | null>(null);
+  const [wallProps, setWallProps] = useState<Record<string, { material: string; absorption: number; color: string }>>({});
+  const [open, setOpen] = useState(false);
 
   const addSource = () => {
     setObjects([
@@ -116,19 +135,78 @@ export default function Scene3D(props: Scene3DProps) {
       },
     ]);
   };
+
+  const handleSelectWall = (
+    wall: string,
+    opts?: { contextMenu?: boolean; x?: number; y?: number }
+  ) => {
+    if (opts?.contextMenu) {
+      setContextMenu({ x: opts.x!, y: opts.y!, wall });
+      setOpen(true);
+    }
+  };
+
+  const handleAssignMaterial = (material: string) => {
+    if (contextMenu) {
+      setWallProps((prev) => ({
+        ...prev,
+        [contextMenu.wall]: {
+          ...prev[contextMenu.wall],
+          material,
+        },
+      }));
+    }
+  };
+
+  const handleAbsorption = (absorption: number) => {
+    if (contextMenu) {
+      setWallProps((prev) => ({
+        ...prev,
+        [contextMenu.wall]: {
+          ...prev[contextMenu.wall],
+          absorption,
+        },
+      }));
+    }
+  };
+
+  const handleColor = (color: string) => {
+    if (contextMenu) {
+      setWallProps((prev) => ({
+        ...prev,
+        [contextMenu.wall]: {
+          ...prev[contextMenu.wall],
+          color,
+        },
+      }));
+    }
+  };
+
+  useEffect(() => {
+    if (!open) setContextMenu(null);
+  }, [open]);
+
   return (
-    <Suspense>
+    <>
       <div className="w-full h-[100vh] rounded-lg shadow">
         <Canvas camera={{ position: [30, 10, -30], fov: 35 }} shadows>
           <color attach="background" args={["#f0f0f0"]} />
-          <SceneContent {...props} />
+          <SceneContent
+            {...props}
+            wallProps={wallProps}
+            onSelectWall={handleSelectWall}
+          />
         </Canvas>
-
-        {/* <SourceControl
-          onAddSource={addSource}
-          onAddMicrophone={addMicrophone}
-        /> */}
       </div>
-    </Suspense>
+      <ContextualMenu
+        open={open}
+        contextMenu={contextMenu}
+        wallProps={wallProps}
+        setOpen={setOpen}
+        onAssignMaterial={handleAssignMaterial}
+        onAbsorption={handleAbsorption}
+        onColor={handleColor}
+      />
+    </>
   );
 }

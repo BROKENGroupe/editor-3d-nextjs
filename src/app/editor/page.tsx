@@ -1,17 +1,15 @@
 "use client";
 
-import { AcousticPanel } from "@/app/editor/acoustic-panel";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getRecommendations } from "@/lib/acustic-engine";
 import { useState } from "react";
-import initialpoints from "../../data/points-dummy.json";
-import AcousticEditor from "./AcousticEditor";
-import { MainNav } from "@/components/main-nav";
-import Scene3D from "./scene3D";
-import { CollapsibleAside } from "./asside-lateral";
+import { LayerPanel, LayerVisibility } from "./layer-panel";
 import { DraggablePanel } from "./daggable-panel";
-import { LayerViewer, LayerVisibility } from "./layer-viewer";
-import { LayerPanel } from "./layer-panel";
+import { CollapsibleAside } from "./asside-lateral";
+import { MainNav } from "@/components/main-nav";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import AcousticEditor from "./AcousticEditor";
+import Scene3D from "./scene3D";
+import initialpoints from "../../data/points-dummy.json";
+import { getRecommendations } from "@/lib/acustic-engine";
 
 const defaultVisibility: LayerVisibility = {
   sources: true,
@@ -20,13 +18,65 @@ const defaultVisibility: LayerVisibility = {
   cube: true,
 };
 
+const initialCubeConfig = {
+  width: 6,
+  height: 3,
+  depth: 6,
+  wallConfig: {
+    north: {
+      material: "concrete",
+      absorption: 0.2,
+      thickness: 0.2,
+      color: "#cccccc",
+    },
+    south: {
+      material: "concrete",
+      absorption: 0.2,
+      thickness: 0.2,
+      color: "#cccccc",
+    },
+    east: {
+      material: "brick",
+      absorption: 0.15,
+      thickness: 0.15,
+      color: "#b87333",
+    },
+    west: {
+      material: "brick",
+      absorption: 0.15,
+      thickness: 0.15,
+      color: "#b87333",
+    },
+    floor: {
+      material: "wood",
+      absorption: 0.1,
+      thickness: 0.1,
+      color: "#deb887",
+    },
+    ceiling: {
+      material: "acoustic_panel",
+      absorption: 0.5,
+      thickness: 0.05,
+      color: "#e0e0e0",
+    },
+  },
+  preset: "",
+  temperature: 22,
+  humidity: 45,
+  listenerHeight: 1.2,
+  showAxes: true,
+  background: "#222831",
+};
+
 export default function AcousticStudy() {
   const [points, setPoints] = useState(initialpoints);
-  const [layerVisibility, setLayerVisibility] =
-    useState<LayerVisibility>(defaultVisibility);
+  const [layerVisibility, setLayerVisibility] = useState<LayerVisibility>(
+    defaultVisibility
+  );
   const [selectedLayer, setSelectedLayer] = useState<string | undefined>(
     undefined
   );
+  const [cubeConfig, setCubeConfig] = useState(initialCubeConfig);
 
   const recommendations = getRecommendations(points, { mode: "day" });
 
@@ -96,15 +146,15 @@ export default function AcousticStudy() {
               selected={selectedLayer}
               onSelect={setSelectedLayer}
             />
-            {/* Puedes agregar más paneles aquí si lo deseas */}
           </CollapsibleAside>
         </div>
       </main>
 
-      <DraggablePanel>
-        {/* Aquí tu contenido, por ejemplo: */}
-        <p>¡Puedes moverme por toda la interfaz!</p>
-      </DraggablePanel>
+      <DraggablePanel
+        initialPosition={{ x: 20, y: 20 }}
+        cubeConfig={cubeConfig}
+        onConfigChange={(config) => setCubeConfig(config)}
+      />
     </>
   );
 }

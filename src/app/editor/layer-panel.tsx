@@ -1,47 +1,65 @@
+"use client";
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { EyeOpenIcon, EyeNoneIcon, SpeakerLoudIcon, CubeIcon, BarChartIcon, BorderAllIcon, ClockIcon, CursorArrowIcon, DownloadIcon, GearIcon, GridIcon, ImageIcon, LayersIcon, MagicWandIcon, TimerIcon, VideoIcon } from "@radix-ui/react-icons";
-import { UserIcon, DoorOpenIcon, ActivityIcon, TagIcon, RulerIcon, StickyNoteIcon } from "lucide-react";
+import {
+  EyeOpenIcon,
+  EyeNoneIcon,
+  SpeakerLoudIcon,
+  CubeIcon,
+  BorderAllIcon,
+  LayersIcon,
+  MagicWandIcon,
+  TimerIcon,
+  BarChartIcon,
+  GridIcon,
+  VideoIcon,
+  ImageIcon,
+  CursorArrowIcon,
+  DownloadIcon,
+  ClockIcon,
+  GearIcon,
+} from "@radix-ui/react-icons";
 
 type Layer = {
   key: string;
   label: string;
   icon: React.ReactNode;
   group?: string;
-  thumbnail?: string; // URL o base64 para miniatura
+  thumbnail?: string;
 };
 
 const LAYERS: Layer[] = [
   // Simulación
   { key: "sources", label: "Fuentes", icon: <SpeakerLoudIcon />, group: "Simulación" },
-  
-  { key: "audience", label: "Público", icon: <UserIcon />, group: "Simulación" },
+//   { key: "microphones", label: "Micrófonos", icon: <MicrophoneIcon />, group: "Simulación" },
+//   { key: "audience", label: "Público", icon: <UserIcon />, group: "Simulación" },
   { key: "walls", label: "Paredes", icon: <BorderAllIcon />, group: "Simulación" },
   { key: "floor", label: "Piso", icon: <LayersIcon />, group: "Simulación" },
   { key: "ceiling", label: "Techo", icon: <LayersIcon />, group: "Simulación" },
-  { key: "doors", label: "Puertas", icon: <DoorOpenIcon />, group: "Simulación" },
-
+//   { key: "doors", label: "Puertas", icon: <DoorOpenIcon />, group: "Simulación" },
+//   { key: "windows", label: "Ventanas", icon: <WindowIcon />, group: "Simulación" },
   { key: "treatments", label: "Tratamientos acústicos", icon: <MagicWandIcon />, group: "Simulación" },
   { key: "obstacles", label: "Obstáculos", icon: <CubeIcon />, group: "Simulación" },
 
   // Visualización
   { key: "heatmap", label: "Mapa de calor", icon: <EyeOpenIcon />, group: "Visualización" },
-  { key: "splContours", label: "Contornos SPL", icon: <ActivityIcon />, group: "Visualización" },
+//   { key: "splContours", label: "Contornos SPL", icon: <ActivityIcon />, group: "Visualización" },
   { key: "rt60", label: "RT60 (Reverberación)", icon: <TimerIcon />, group: "Visualización" },
   { key: "frequencyBands", label: "Bandas de frecuencia", icon: <BarChartIcon />, group: "Visualización" },
   { key: "grid", label: "Cuadrícula", icon: <GridIcon />, group: "Visualización" },
-  { key: "labels", label: "Etiquetas", icon: <TagIcon />, group: "Visualización" },
-  { key: "measureLines", label: "Líneas de medición", icon: <RulerIcon />, group: "Visualización" },
+//   { key: "labels", label: "Etiquetas", icon: <TagIcon />, group: "Visualización" },
+//   { key: "measureLines", label: "Líneas de medición", icon: <RulerIcon />, group: "Visualización" },
   { key: "cameraPath", label: "Trayectoria de cámara", icon: <VideoIcon />, group: "Visualización" },
   { key: "cube", label: "Cubo 3D", icon: <CubeIcon />, group: "Visualización" },
   { key: "background", label: "Fondo", icon: <ImageIcon />, group: "Visualización" },
 
   // Herramientas
   { key: "selection", label: "Selección", icon: <CursorArrowIcon />, group: "Herramientas" },
-  { key: "notes", label: "Notas", icon: <StickyNoteIcon />, group: "Herramientas" },
+//   { key: "notes", label: "Notas", icon: <StickyNoteIcon />, group: "Herramientas" },
   { key: "export", label: "Exportar", icon: <DownloadIcon />, group: "Herramientas" },
   { key: "history", label: "Historial", icon: <ClockIcon />, group: "Herramientas" },
   { key: "settings", label: "Configuración", icon: <GearIcon />, group: "Herramientas" },
@@ -50,6 +68,7 @@ const LAYERS: Layer[] = [
 const GROUPS = [
   { key: "Simulación", label: "Simulación" },
   { key: "Visualización", label: "Visualización" },
+  { key: "Herramientas", label: "Herramientas" },
 ];
 
 export type LayerVisibility = Record<string, boolean>;
@@ -71,15 +90,6 @@ export function LayerPanel({
   // Simulación de selección de capa
   const handleSelect = (key: string) => {
     onSelect?.(key);
-  };
-
-  // Simulación de acordeón
-  const handleAccordion = (group: string) => {
-    setOpenGroups((prev) =>
-      prev.includes(group)
-        ? prev.filter((g) => g !== group)
-        : [...prev, group]
-    );
   };
 
   return (
@@ -107,7 +117,7 @@ export function LayerPanel({
                     {group.label}
                   </AccordionTrigger>
                   <AccordionContent className="p-0">
-                    <ul>
+                    <ul className="max-h-[400px] overflow-y-auto pr-1">
                       {LAYERS.filter(l => l.group === group.key).map((layer) => (
                         <li
                           key={layer.key}

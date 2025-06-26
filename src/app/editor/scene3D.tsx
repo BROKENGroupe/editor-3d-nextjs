@@ -76,7 +76,7 @@ function SceneContent({ width, height, depth, wallProps, onSelectWall }: Scene3D
       </directionalLight>
 
       {points.map((point) => (
-        <mesh key={point.id} position={[point.x, point.y, point.z]}>
+        <mesh key={point.id} position={[0, 0, 0]}>
           <sphereGeometry args={[0.1, 16, 16]} />
           <meshStandardMaterial color={getHeatColor(point.db)} />
         </mesh>
@@ -195,7 +195,7 @@ export default function Scene3D(props: Scene3DProps) {
             {...props}
             wallProps={wallProps}
             onSelectWall={handleSelectWall}
-          />
+          />           
         </Canvas>
       </div>
       <ContextualMenu

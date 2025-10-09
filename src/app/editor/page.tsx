@@ -85,7 +85,7 @@ export default function AcousticStudy() {
       <div className="bg-background">
         <header className="fixed top-0 z-50 w-full border-b bg-background backdrop-blur">
           <div className="container flex h-14 items-center">
-            <MainNav />
+            {/* <MainNav /> */}
           </div>
         </header>
       </div>

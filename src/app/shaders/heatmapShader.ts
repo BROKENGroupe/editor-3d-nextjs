@@ -9,11 +9,11 @@ void main() {
 `;
 
 export const heatmapFragment = `
-uniform float uTime;
-uniform vec3 uColor1; // azul (< 60dB)
-uniform vec3 uColor2; // verde (60-70dB)
-uniform vec3 uColor3; // amarillo (70-80dB)
-uniform vec3 uColor4; // rojo (> 80dB)
+uniform sampler2D uData;
+uniform vec3 uColor1;
+uniform vec3 uColor2;
+uniform vec3 uColor3;
+uniform vec3 uColor4;
 varying vec2 vUv;
 
 vec3 getHeatColor(float value) {
@@ -35,7 +35,7 @@ void main() {
     float dist = distance(vUv, center);
     
     float intensity = 1.0 - smoothstep(0.0, 0.8, dist);
-    float wave = sin(dist * 10.0 - uTime) * 0.5 + 0.5;
+    float wave = sin(dist * 10.0) * 0.5 + 0.5;
     
     float value = mix(intensity, wave, 0.2);
     vec3 color = getHeatColor(value);

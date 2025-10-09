@@ -42,7 +42,7 @@ export function MainNav() {
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <Link href="/" legacyBehavior passHref>
+            <Link href="/" passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                 Inicio
               </NavigationMenuLink>
@@ -55,14 +55,16 @@ export function MainNav() {
               <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                 {components.map((component) => (
                   <li key={component.title}>
-                    <Link href={component.href} legacyBehavior passHref>
-                      <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="text-sm font-medium leading-none">
-                          {component.title}
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          {component.description}
-                        </p>
+                    <Link href={component.href} passHref legacyBehavior>
+                      <NavigationMenuLink asChild>
+                        <a className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">
+                            {component.title}
+                          </div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            {component.description}
+                          </p>
+                        </a>
                       </NavigationMenuLink>
                     </Link>
                   </li>

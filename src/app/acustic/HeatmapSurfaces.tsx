@@ -1,208 +1,35 @@
-// import { useRef, useMemo } from "react";
-// import * as THREE from "three";
-// import { heatmapVertex, heatmapFragment } from "../shaders/heatmapShader";
-// import { calculateSPL } from "@/lib/spl";
-
-// type Props = {
-//   width: number;
-//   height: number;
-//   depth: number;
-//   points?: any[];
-//   onSelectWall?: (wallId: string, opts?: { contextMenu?: boolean; x?: number; y?: number }) => void;
-//   wallProps?: Record<string, { material: string; absorption: number; color: string }>;
-// };
-
-// export function HeatmapSurfaces({
-//   width,
-//   height,
-//   depth,
-//   points = [],
-//   onSelectWall,
-//   wallProps = {},
-// }: Props) {
-//   const materialRef = useRef<THREE.ShaderMaterial>(null);
-
-//   // Paredes del cubo
-//   const WALLS = [
-//     { key: "floor", position: [width / 2, 0, depth / 2], rotation: [-Math.PI / 2, 0, 0], size: [width, depth] },
-//     { key: "ceiling", position: [width / 2, height, depth / 2], rotation: [Math.PI / 2, 0, 0], size: [width, depth] },
-//     { key: "north", position: [width / 2, height / 2, 0], rotation: [0, 0, 0], size: [width, height] },
-//     { key: "south", position: [width / 2, height / 2, depth], rotation: [0, Math.PI, 0], size: [width, height] },
-//     { key: "west", position: [0, height / 2, depth / 2], rotation: [0, Math.PI / 2, 0], size: [depth, height] },
-//     { key: "east", position: [width, height / 2, depth / 2], rotation: [0, -Math.PI / 2, 0], size: [depth, height] },
-//   ] as const;
-
-//   // Parámetros para el plano exterior y la fuga localizada
-//   const heatmapSegments = 48;
-//   const extWidth = width * 3;
-//   const extDepth = depth * 3;
-//   const minSPL = 40;
-//   const maxSPL = 105;
-//   const fugaWidth = width * 0.18; // ancho de la fuga (puerta)
-//   const fugaHeight = depth * 0.25; // alto de la fuga (puerta)
-//   const fugaOffsetX = (extWidth + width) / 2; // posición de la cara east
-//   const fugaOffsetZ = extDepth / 2; // centro de la cara east
-
-//   const heatmapPoints = useMemo(() => {
-//     const arr: { x: number; z: number; spl: number }[] = [];
-//     for (let ix = 0; ix < heatmapSegments; ix++) {
-//       for (let iz = 0; iz < heatmapSegments; iz++) {
-//         const x = (ix / (heatmapSegments - 1)) * extWidth;
-//         const z = (iz / (heatmapSegments - 1)) * extDepth;
-//         // ¿Está dentro del cubo?
-//         const inside =
-//           x > (extWidth - width) / 2 &&
-//           x < (extWidth + width) / 2 &&
-//           z > (extDepth - depth) / 2 &&
-//           z < (extDepth + depth) / 2;
-
-//         // SPL bajo dentro, alto fuera
-//         let spl = inside
-//           ? minSPL + Math.random() * 3
-//           : maxSPL - Math.random() * 10;
-
-//         // Fuga localizada: simula una puerta en la cara east (centro de la cara)
-//         const isFuga =
-//           !inside &&
-//           x > fugaOffsetX - fugaWidth / 2 &&
-//           x < fugaOffsetX + fugaWidth / 2 &&
-//           z > fugaOffsetZ - fugaHeight / 2 &&
-//           z < fugaOffsetZ + fugaHeight / 2;
-
-//         if (isFuga) {
-//           // SPL máximo en la fuga y gradiente hacia afuera
-//           const distFuga = Math.sqrt(
-//             ((x - fugaOffsetX) / (fugaWidth / 2)) ** 2 +
-//             ((z - fugaOffsetZ) / (fugaHeight / 2)) ** 2
-//           );
-//           spl = maxSPL - distFuga * 30 + Math.random() * 2;
-//           if (spl > maxSPL) spl = maxSPL;
-//         }
-
-//         arr.push({ x, z, spl });
-//       }
-//     }
-//     return arr;
-//   }, [width, depth]);
-
-//   // Normaliza SPL para el shader
-//   const splVals = heatmapPoints.map((p) => p.spl);
-//   const minSPLv = Math.min(...splVals);
-//   const maxSPLv = Math.max(...splVals);
-//   const normalized = splVals.map((v) => (v - minSPLv) / (maxSPLv - minSPLv));
-//   const data = new Float32Array(normalized);
-//   const dataTexture = useMemo(() => {
-//     const tex = new THREE.DataTexture(
-//       data,
-//       heatmapSegments,
-//       heatmapSegments,
-//       THREE.RedFormat,
-//       THREE.FloatType
-//     );
-//     tex.needsUpdate = true;
-//     return tex;
-//   }, [data, heatmapSegments]);
-
-//   // Puntos SPL simulados (opcional, para visualización)
-//   const splPoints = useMemo(() => {
-//     const pointsArr: { x: number; y: number; z: number; spl: number }[] = [];
-//     const gridX = 12;
-//     const gridZ = 12;
-//     const src = { x: width / 2, y: 1.5, z: depth / 2, Lw: 85, Q: 1, alpha: 0.01 };
-//     for (let ix = 0; ix < gridX; ix++) {
-//       for (let iz = 0; iz < gridZ; iz++) {
-//         const x = (ix / (gridX - 1)) * width;
-//         const z = (iz / (gridZ - 1)) * depth;
-//         const r = Math.sqrt((x - src.x) ** 2 + (0 - src.y) ** 2 + (z - src.z) ** 2);
-//         const spl = calculateSPL(src.Lw, src.Q, Math.max(r, 0.5), src.alpha);
-//         pointsArr.push({ x, y: 0.02, z, spl });
-//       }
-//     }
-//     return pointsArr;
-//   }, [width, depth]);
-
-//   // Colores realistas para mapa de calor acústico
-//   const shaderArgs = useMemo(
-//     () => ({
-//       uniforms: {
-//         uColor1: { value: new THREE.Color("#002266") }, // azul oscuro
-//         uColor2: { value: new THREE.Color("#00ff00") }, // verde
-//         uColor3: { value: new THREE.Color("#ffff00") }, // amarillo
-//         uColor4: { value: new THREE.Color("#ff9900") }, // naranja
-//         uColor5: { value: new THREE.Color("#ff0000") }, // rojo
-//         uData: { value: dataTexture },
-//       },
-//       vertexShader: heatmapVertex,
-//       fragmentShader: heatmapFragment,
-//       transparent: true,
-//     }),
-//     [dataTexture]
-//   );
-
-//   return (
-//     <>
-//       {/* Cubo translúcido centrado */}
-//       {WALLS.map((wall) => (
-//         <mesh
-//           key={wall.key}
-//           position={[
-//             wall.position[0] + (extWidth - width) / 2,
-//             wall.position[1],
-//             wall.position[2] + (extDepth - depth) / 2,
-//           ]}
-//           rotation={wall.rotation}
-//           onClick={(e) => {
-//             e.stopPropagation();
-//             onSelectWall?.(wall.key);
-//           }}
-//           onContextMenu={(e) => {
-//             e.stopPropagation();
-//             e.nativeEvent.preventDefault();
-//             onSelectWall?.(wall.key, { contextMenu: true, x: e.clientX, y: e.clientY });
-//           }}
-//         >
-//           <planeGeometry args={wall.size} />
-//           <meshStandardMaterial
-//             color={wallProps?.[wall.key]?.color ?? "#a78bfa"}
-//             transparent
-//             opacity={0.4}
-//             side={2}
-//           />
-//         </mesh>
-//       ))}
-
-//       {/* Plano exterior con shader (heatmap) */}
-//       <mesh
-//         position={[0, 0, 0]}
-//         rotation={[-Math.PI / 2, 0, 0]}
-//       >
-//         <planeGeometry args={[extWidth, extDepth, heatmapSegments - 1, heatmapSegments - 1]} />
-//         <shaderMaterial
-//           ref={materialRef}
-//           attach="material"
-//           {...shaderArgs}
-//         />
-//       </mesh>
-
-//       {/* Puntos SPL simulados dentro del cubo */}
-//       {splPoints.map((pt, i) => (
-//         <mesh key={i} position={[
-//           pt.x + (1.5 * width - width) / 2,
-//           pt.y,
-//           pt.z + (1.5 * depth - depth) / 2
-//         ]}>
-//           <sphereGeometry args={[0.07, 8, 8]} />
-//           <meshStandardMaterial color="#222" />
-//         </mesh>
-//       ))}
-//     </>
-//   );
-// }
-
-import { useRef, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import * as THREE from "three";
-import { heatmapVertex, heatmapFragment } from "../shaders/heatmapShader";
+import { Html } from "@react-three/drei";
 import { calculateSPL } from "@/lib/spl";
+
+// --- SHADERS DIRECTAMENTE EN ESTE ARCHIVO ---
+const heatmapVertex = `
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const heatmapFragment = `
+uniform sampler2D uData;
+uniform vec3 uColor1;
+uniform vec3 uColor2;
+uniform vec3 uColor3;
+uniform vec3 uColor4;
+uniform vec3 uColor5;
+varying vec2 vUv;
+void main() {
+    float spl = texture2D(uData, vUv).r;
+    vec3 color =
+        spl < 0.25 ? mix(uColor1, uColor2, spl / 0.25) :
+        spl < 0.5  ? mix(uColor2, uColor3, (spl - 0.25) / 0.25) :
+        spl < 0.75 ? mix(uColor3, uColor4, (spl - 0.5) / 0.25) :
+                     mix(uColor4, uColor5, (spl - 0.75) / 0.25);
+    gl_FragColor = vec4(color, 0.8);
+}
+`;
 
 type Props = {
   width: number;
@@ -233,61 +60,50 @@ export function HeatmapSurfaces({
     { key: "east", position: [width / 2, height / 2, 0], rotation: [0, -Math.PI / 2, 0], size: [depth, height] },
   ] as const;
 
-  const heatmapSegments = 48;
+  const heatmapSegments = 512; // o más
   const extWidth = width * 3;
   const extDepth = depth * 3;
-  const minSPL = 40;
-  const maxSPL = 105;
-  const fugaWidth = width * 0.18;
-  const fugaHeight = depth * 0.25;
-  const fugaOffsetX = 0 + width / 2 + (extWidth - width) / 2;
-  const fugaOffsetZ = 0;
 
-  // ✅ Heatmap centrado
-  const heatmapPoints = useMemo(() => {
-    const arr: { x: number; z: number; spl: number }[] = [];
-    for (let ix = 0; ix < heatmapSegments; ix++) {
-      for (let iz = 0; iz < heatmapSegments; iz++) {
-        const x = (ix / (heatmapSegments - 1)) * extWidth - extWidth / 2;
-        const z = (iz / (heatmapSegments - 1)) * extDepth - extDepth / 2;
+  // Estado para el mapa SPL de la "API"
+  const [apiMap, setApiMap] = useState<{ x: number; y: number; spl: number }[]>([]);
 
-        const inside =
-          x > -width / 2 && x < width / 2 &&
-          z > -depth / 2 && z < depth / 2;
+  const [fugaX, setFugaX] = useState(width / 8); // posición X de la fuga
+  const [fugaY0, setFugaY0] = useState(-depth / 4); // inicio Y de la puerta
+  const [fugaY1, setFugaY1] = useState(depth / 4);  // fin Y de la puerta
 
-        let spl = inside
-          ? minSPL + Math.random() * 3
-          : maxSPL - Math.random() * 10;
+  // Para actualizar la fuga al hacer submit
+  const [fugaParams, setFugaParams] = useState({ fugaX, fugaY0, fugaY1 });
 
-        const isFuga =
-          !inside &&
-          x > fugaOffsetX - fugaWidth / 2 &&
-          x < fugaOffsetX + fugaWidth / 2 &&
-          z > fugaOffsetZ - fugaHeight / 2 &&
-          z < fugaOffsetZ + fugaHeight / 2;
+  function handleFugaSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setFugaParams({ fugaX, fugaY0, fugaY1 });
+  }
 
-        if (isFuga) {
-          const distFuga = Math.sqrt(
-            ((x - fugaOffsetX) / (fugaWidth / 2)) ** 2 +
-            ((z - fugaOffsetZ) / (fugaHeight / 2)) ** 2
-          );
-          spl = maxSPL - distFuga * 30 + Math.random() * 2;
-          if (spl > maxSPL) spl = maxSPL;
-        }
+  useEffect(() => {
+    fetchEscapeSPLMap({
+      width: extWidth,
+      depth: extDepth,
+      segments: heatmapSegments,
+      wallProps,
+      fugaX: fugaParams.fugaX,
+      fugaY0: fugaParams.fugaY0,
+      fugaY1: fugaParams.fugaY1,
+    }).then(setApiMap);
+  }, [width, depth, wallProps, fugaParams]);
 
-        arr.push({ x, z, spl });
-      }
-    }
-    return arr;
-  }, [width, depth]);
-
-  const splVals = heatmapPoints.map((p) => p.spl);
-  const minSPLv = Math.min(...splVals);
-  const maxSPLv = Math.max(...splVals);
-  const normalized = splVals.map((v) => (v - minSPLv) / (maxSPLv - minSPLv));
-  const data = new Float32Array(normalized);
-
+  // Convierte el mapa de la API a textura para el shader
   const dataTexture = useMemo(() => {
+    if (!apiMap.length) return null;
+    const splVals = apiMap.map((p) => p.spl);
+
+    let minSPL = Infinity;
+    let maxSPL = -Infinity;
+    for (let i = 0; i < splVals.length; i++) {
+      if (splVals[i] < minSPL) minSPL = splVals[i];
+      if (splVals[i] > maxSPL) maxSPL = splVals[i];
+    }
+    const normalized = splVals.map((v) => (v - minSPL) / (maxSPL - minSPL));
+    const data = new Float32Array(normalized);
     const tex = new THREE.DataTexture(
       data,
       heatmapSegments,
@@ -296,26 +112,65 @@ export function HeatmapSurfaces({
       THREE.FloatType
     );
     tex.needsUpdate = true;
+    tex.magFilter = THREE.LinearFilter;
+    tex.minFilter = THREE.LinearFilter;
     return tex;
-  }, [data, heatmapSegments]);
+  }, [apiMap, heatmapSegments]);
 
-  // ✅ SPL points centrados
-  // const splPoints = useMemo(() => {
-  //   const pointsArr: { x: number; y: number; z: number; spl: number }[] = [];
-  //   const gridX = 12;
-  //   const gridZ = 12;
-  //   const src = { x: 0, y: 1.5, z: 0, Lw: 85, Q: 1, alpha: 0.01 };
-  //   for (let ix = 0; ix < gridX; ix++) {
-  //     for (let iz = 0; iz < gridZ; iz++) {
-  //       const x = (ix / (gridX - 1)) * width - width / 2;
-  //       const z = (iz / (gridZ - 1)) * depth - depth / 2;
-  //       const r = Math.sqrt((x - src.x) ** 2 + (0 - src.y) ** 2 + (z - src.z) ** 2);
-  //       const spl = calculateSPL(src.Lw, src.Q, Math.max(r, 0.5), src.alpha);
-  //       pointsArr.push({ x, y: 0.02, z, spl });
-  //     }
-  //   }
-  //   return pointsArr;
-  // }, [width, depth]);
+  // Simula una API que devuelve SPL de escape según materiales y absorción
+  function fetchEscapeSPLMap({
+    width,
+    depth,
+    segments,
+    wallProps,
+    fugaX,
+    fugaY0,
+    fugaY1,
+  }: {
+    width: number;
+    depth: number;
+    segments: number;
+    wallProps: Record<string, { absorption: number }>;
+    fugaX: number;
+    fugaY0: number;
+    fugaY1: number;
+  }): Promise<{ x: number; y: number; spl: number }[]> {
+    return new Promise((resolve) => {
+      const arr: { x: number; y: number; spl: number }[] = [];
+      // Esquina de fuga: superior derecha (+X, +Y)
+      const fugaRadio = Math.min(width, depth) * 0.35;
+      const baseSPL = 105;
+      const minSPL = 40;
+      const abs = wallProps?.east?.absorption ?? 0.2;
+
+      for (let ix = 0; ix < segments; ix++) {
+        for (let iy = 0; iy < segments; iy++) {
+          // x e y en coords del plano exterior
+          const x = (ix / (segments - 1)) * width * 3 - width * 3 / 2;
+          const y = (iy / (segments - 1)) * depth * 3 - depth * 3 / 2;
+
+          // Distancia a la franja de fuga (puerta)
+          // Si y está dentro de la puerta, distancia solo en X; si no, distancia al borde de la puerta
+          let distFuga;
+          if (y >= fugaY0 && y <= fugaY1) {
+            distFuga = Math.abs(x - fugaX);
+          } else {
+            const dy = y < fugaY0 ? fugaY0 - y : y - fugaY1;
+            distFuga = Math.sqrt((x - fugaX) ** 2 + dy ** 2);
+          }
+
+          let spl =
+            baseSPL -
+            (distFuga / fugaRadio) * 60 -
+            abs * 40 +
+            Math.random() * 2;
+          if (spl < minSPL) spl = minSPL;
+          arr.push({ x, y, spl });
+        }
+      }
+      setTimeout(() => resolve(arr), 400); // Simula retardo de red
+    });
+  }
 
   const shaderArgs = useMemo(
     () => ({
@@ -325,7 +180,7 @@ export function HeatmapSurfaces({
         uColor3: { value: new THREE.Color("#ffff00") },
         uColor4: { value: new THREE.Color("#ff9900") },
         uColor5: { value: new THREE.Color("#ff0000") },
-        //uData: { value: dataTexture },
+        uData: { value: dataTexture },
       },
       vertexShader: heatmapVertex,
       fragmentShader: heatmapFragment,
@@ -333,6 +188,12 @@ export function HeatmapSurfaces({
     }),
     [dataTexture]
   );
+
+  useEffect(() => {
+    if (materialRef.current && dataTexture) {
+      materialRef.current.uniforms.uData.value = dataTexture;
+    }
+  }, [dataTexture]);
 
   return (
     <>
@@ -366,21 +227,90 @@ export function HeatmapSurfaces({
         </mesh>
       ))}
 
-      {/* Heatmap centrado */}
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry
-          args={[extWidth, extDepth, heatmapSegments - 1, heatmapSegments - 1]}
-        />
-        <shaderMaterial ref={materialRef} attach="material" {...shaderArgs} />
-      </mesh>
-
-      {/* Puntos SPL centrados */}
-      {/* {splPoints.map((pt, i) => (
-        <mesh key={i} position={[pt.x, pt.y, pt.z]}>
-          <sphereGeometry args={[0.07, 8, 8]} />
-          <meshStandardMaterial color="#222" />
+      {/* Heatmap centrado bajo el cubo */}
+      {dataTexture && (
+        <mesh
+          position={[0, -0.01, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <planeGeometry
+            args={[extWidth, extDepth, heatmapSegments - 1, heatmapSegments - 1]}
+          />
+          <shaderMaterial
+            ref={materialRef}
+            attach="material"
+            {...shaderArgs}
+            uniforms-uData-value={dataTexture}
+          />
+          {/* Formulario overlay en la escena */}
+          <Html position={[0, 0.1, 0]} zIndexRange={[10, 0]}>
+            <form
+              onSubmit={handleFugaSubmit}
+              style={{
+                background: "#fff",
+                padding: 16,
+                borderRadius: 8,
+                boxShadow: "0 2px 12px #0002",
+                minWidth: 220,
+              }}
+            >
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>Configurar Fuga</div>
+              <label>
+                X (posición puerta):
+                <input
+                  type="number"
+                  step="0.1"
+                  value={fugaX}
+                  min={-width / 2}
+                  max={width / 2}
+                  onChange={e => setFugaX(Number(e.target.value))}
+                  style={{ width: "100%", marginBottom: 8 }}
+                />
+              </label>
+              <label>
+                Y inicio:
+                <input
+                  type="number"
+                  step="0.1"
+                  value={fugaY0}
+                  min={-depth / 2}
+                  max={depth / 2}
+                  onChange={e => setFugaY0(Number(e.target.value))}
+                  style={{ width: "100%", marginBottom: 8 }}
+                />
+              </label>
+              <label>
+                Y fin:
+                <input
+                  type="number"
+                  step="0.1"
+                  value={fugaY1}
+                  min={-depth / 2}
+                  max={depth / 2}
+                  onChange={e => setFugaY1(Number(e.target.value))}
+                  style={{ width: "100%", marginBottom: 8 }}
+                />
+              </label>
+              <button
+                type="submit"
+                style={{
+                  marginTop: 8,
+                  width: "100%",
+                  background: "#6366f1",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 4,
+                  padding: "8px 0",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Aplicar
+              </button>
+            </form>
+          </Html>
         </mesh>
-      ))} */}
+      )}
     </>
   );
 }
